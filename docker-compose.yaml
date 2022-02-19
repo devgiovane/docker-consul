@@ -1,0 +1,69 @@
+version: '3'
+services:
+    consulserver01:
+        build: ./
+        container_name: consulserver01
+        hostname: consulserver01
+        networks:
+            consul:
+                ipv4_address: 10.5.0.2
+        command: [ 'consul', 'agent', '--config-dir=/etc/consul.d' ]
+        volumes:
+            - ./servers/consul01:/etc/consul.d
+        ports:
+            - "8500:8500"
+    consulserver02:
+        build: ./
+        container_name: consulserver02
+        hostname: consulserver02
+        networks:
+            consul:
+                ipv4_address: 10.5.0.3
+        command: [ 'consul', 'agent', '--config-dir=/etc/consul.d' ]
+        volumes:
+            - ./servers/consul02:/etc/consul.d
+    consulserver03:
+        build: ./
+        container_name: consulserver03
+        hostname: consulserver03
+        networks:
+            consul:
+                ipv4_address: 10.5.0.4
+        command: [ 'consul', 'agent', '--config-dir=/etc/consul.d' ]
+        volumes:
+            - ./servers/consul03:/etc/consul.d
+    consulclient01:
+        build: ./
+        container_name: consulclient01
+        hostname: consulclient01
+        depends_on:
+            - consulserver01
+            - consulserver02
+            - consulserver03
+        networks:
+            consul:
+                ipv4_address: 10.5.0.5
+        command: [ 'consul', 'agent', '--config-dir=/etc/consul.d' ]
+        volumes:
+            - ./clients/consul01:/etc/consul.d
+    consulclient02:
+        build: ./
+        container_name: consulclient02
+        hostname: consulclient02
+        depends_on:
+            - consulserver01
+            - consulserver02
+            - consulserver03
+        networks:
+            consul:
+                ipv4_address: 10.5.0.6
+        command: [ 'consul', 'agent', '--config-dir=/etc/consul.d' ]
+        volumes:
+            - ./clients/consul02:/etc/consul.d
+networks:
+    consul:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 10.5.0.0/16
+                  gateway: 10.5.0.1
